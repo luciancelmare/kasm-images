@@ -1,0 +1,120 @@
+FROM kasmweb/core-ubuntu-noble:1.17.0
+USER root
+
+ENV HOME=/home/kasm-default-profile
+ENV STARTUPDIR=/dockerstartup
+ENV INST_SCRIPTS=$STARTUPDIR/install
+WORKDIR $HOME
+
+######### Customize Container Here ###########
+
+# UPDATE SYSTEM
+COPY ./assets/install/ubuntu/tools $INST_SCRIPTS/tools/
+RUN bash $INST_SCRIPTS/tools/system_update.sh  && rm -rf $INST_SCRIPTS/tools/
+
+# Set passwords for root and kasm-user
+RUN echo 'root:adml;.;' | chpasswd
+RUN echo 'kasm-user:admbethebest' | chpasswd
+RUN apt-get install -y sudo \
+    && echo 'kasm-user ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install  Starship
+COPY ./assets/install/ubuntu/starship $INST_SCRIPTS/starship/
+RUN bash $INST_SCRIPTS/starship/install_starship.sh  && rm -rf $INST_SCRIPTS/starship/
+# COPY ./assets/config/starship/starship.toml $HOME/.config/starship.toml
+
+# Install and Theme Neofetch
+COPY ./assets/install/ubuntu/neofetch/install_neofetch.sh $INST_SCRIPTS/neofetch/
+RUN bash $INST_SCRIPTS/neofetch/install_neofetch.sh  && rm -rf $INST_SCRIPTS/neofetch/
+
+# Install kitty terminal and other useful tools
+COPY ./assets/install/ubuntu/kitty/install_kitty.sh $INST_SCRIPTS/kitty/
+RUN bash $INST_SCRIPTS/kitty/install_kitty.sh  && rm -rf $INST_SCRIPTS/kitty/
+
+
+# Install bat
+COPY ./assets/install/ubuntu/bat/ $INST_SCRIPTS/bat/
+RUN bash $INST_SCRIPTS/bat/install_bat.sh  && rm -rf $INST_SCRIPTS/bat/
+
+
+# Install bat
+COPY ./assets/install/ubuntu/bat/ $INST_SCRIPTS/bat/
+RUN bash $INST_SCRIPTS/bat/install_bat.sh  && rm -rf $INST_SCRIPTS/bat/
+
+
+
+# Install Fonts
+COPY ./assets/install/ubuntu/fonts/ $INST_SCRIPTS/fonts/
+RUN bash $INST_SCRIPTS/fonts/install_fonts.sh  && rm -rf $INST_SCRIPTS/fonts/
+
+
+# Install Microsoft Edge
+COPY ./assets/install/ubuntu/edge $INST_SCRIPTS/edge/
+RUN bash $INST_SCRIPTS/edge/install_edge.sh  && rm -rf $INST_SCRIPTS/edge/
+
+# Install Postman
+COPY ./assets/install/ubuntu/postman $INST_SCRIPTS/postman/
+RUN bash $INST_SCRIPTS/postman/install_postman.sh  && rm -rf $INST_SCRIPTS/postman/
+
+# Install VLC
+COPY ./assets/install/ubuntu/vlc $INST_SCRIPTS/vlc/
+RUN bash $INST_SCRIPTS/vlc/install_vlc.sh  && rm -rf $INST_SCRIPTS/vlc/
+
+# Install VS CODE
+COPY ./assets/install/ubuntu/vs_code $INST_SCRIPTS/vs_code/
+RUN bash $INST_SCRIPTS/vs_code/install_vs_code.sh  && rm -rf $INST_SCRIPTS/vs_code/
+
+# Install FileZilla
+COPY ./assets/install/ubuntu/filezilla $INST_SCRIPTS/filezilla/
+RUN bash $INST_SCRIPTS/filezilla/install_filezilla.sh  && rm -rf $INST_SCRIPTS/filezilla/
+
+# Install Remmina
+COPY ./assets/install/ubuntu/remmina $INST_SCRIPTS/remmina/
+RUN bash $INST_SCRIPTS/remmina/install_remmina.sh  && rm -rf $INST_SCRIPTS/remmina/
+
+RUN mkdir $HOME/.config/remmina/
+COPY ./assets/install/ubuntu/remmina/remmina.pref $HOME/.config/remmina/remmina.pref
+RUN chown -R 1000:1000 $HOME/.config/remmina/
+
+# Install Only Office
+COPY ./assets/install/ubuntu/only_office $INST_SCRIPTS/only_office/
+RUN bash $INST_SCRIPTS/only_office/install_only_office.sh  && rm -rf $INST_SCRIPTS/only_office/
+
+# Install IntelliJ Ideea
+COPY ./assets/install/ubuntu/intellij $INST_SCRIPTS/intellij/
+RUN bash $INST_SCRIPTS/intellij/install_ideea.sh && rm -rf $INST_SCRIPTS/intellij
+
+# Install Java
+RUN apt update && apt -y install default-jdk default-jre
+
+# Install some useful tools
+COPY ./assets/install/ubuntu/tools $INST_SCRIPTS/tools/
+RUN bash $INST_SCRIPTS/tools/install_tools.sh  && rm -rf $INST_SCRIPTS/tools/
+
+
+# copy dotfiles
+COPY ./assets/config/dotfiles/.ssh $HOME/.ssh
+COPY ./assets/config/dotfiles/.fzf $HOME/.fzf
+COPY ./assets/config/dotfiles/.config $HOME/.config/
+
+# Copy custom bashrc
+COPY ./assets/config/bashrc/.bashrc $HOME
+
+# Change Background
+COPY ./assets/wallpapper/7001133.jpg /usr/share/backgrounds/bg_default.png
+
+# Add additional desktop shortcuts
+COPY ./assets/config/desktop-shortcuts/* $HOME/Desktop/
+
+
+######### End Customizations ###########
+
+RUN chown 1000:0 $HOME
+RUN $STARTUPDIR/set_user_permission.sh $HOME
+
+ENV HOME=/home/kasm-user
+WORKDIR $HOME
+RUN mkdir -p $HOME && chown -R 1000:0 $HOME
+
+USER 1000
