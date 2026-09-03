@@ -39,5 +39,9 @@ docker push luciancelmare/kasm-remmina:v1.0
 > Microsoft EDGE
 >
 > FileZilla
+>
+>Parsec
+>
+>RustDesk
 
 

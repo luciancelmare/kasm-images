@@ -28,5 +28,7 @@ apt -y install tty-clock
 apt -y install make
 apt -y install screen
 apt -y install vim
+apt -y install ssh
+
 
 
