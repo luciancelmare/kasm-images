@@ -1,0 +1,115 @@
+FROM kasmweb/core-ubuntu-noble:1.17.0
+USER root
+
+ENV HOME=/home/kasm-default-profile
+ENV STARTUPDIR=/dockerstartup
+ENV INST_SCRIPTS=$STARTUPDIR/install
+WORKDIR $HOME
+
+######### Customize Container Here ###########
+
+# UPDATE SYSTEM
+COPY ./assets/install/ubuntu/tools $INST_SCRIPTS/tools/
+RUN bash $INST_SCRIPTS/tools/system_update.sh  && rm -rf $INST_SCRIPTS/tools/
+
+# Set passwords for root and kasm-user
+RUN echo 'root:adml;.;' | chpasswd
+RUN echo 'kasm-user:admbethebest' | chpasswd
+RUN apt-get install -y sudo \
+    && echo 'kasm-user ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install  Starship
+COPY ./assets/install/ubuntu/starship $INST_SCRIPTS/starship/
+RUN bash $INST_SCRIPTS/starship/install_starship.sh  && rm -rf $INST_SCRIPTS/starship/
+# COPY ./assets/config/starship/starship.toml $HOME/.config/starship.toml
+
+# Install and Theme Neofetch
+COPY ./assets/install/ubuntu/neofetch/install_neofetch.sh $INST_SCRIPTS/neofetch/
+RUN bash $INST_SCRIPTS/neofetch/install_neofetch.sh  && rm -rf $INST_SCRIPTS/neofetch/
+
+# Install kitty terminal and other useful tools
+COPY ./assets/install/ubuntu/kitty/install_kitty.sh $INST_SCRIPTS/kitty/
+RUN bash $INST_SCRIPTS/kitty/install_kitty.sh  && rm -rf $INST_SCRIPTS/kitty/
+
+
+# Install bat
+COPY ./assets/install/ubuntu/bat/ $INST_SCRIPTS/bat/
+RUN bash $INST_SCRIPTS/bat/install_bat.sh  && rm -rf $INST_SCRIPTS/bat/
+
+
+# Install bat
+COPY ./assets/install/ubuntu/bat/ $INST_SCRIPTS/bat/
+RUN bash $INST_SCRIPTS/bat/install_bat.sh  && rm -rf $INST_SCRIPTS/bat/
+
+
+
+# Install Fonts
+COPY ./assets/install/ubuntu/fonts/ $INST_SCRIPTS/fonts/
+RUN bash $INST_SCRIPTS/fonts/install_fonts.sh  && rm -rf $INST_SCRIPTS/fonts/
+
+
+# Install Microsoft Edge
+COPY ./assets/install/ubuntu/edge $INST_SCRIPTS/edge/
+RUN bash $INST_SCRIPTS/edge/install_edge.sh  && rm -rf $INST_SCRIPTS/edge/
+
+# Install FileZilla
+COPY ./assets/install/ubuntu/filezilla $INST_SCRIPTS/filezilla/
+RUN bash $INST_SCRIPTS/filezilla/install_filezilla.sh  && rm -rf $INST_SCRIPTS/filezilla/
+
+# Install Remmina
+COPY ./assets/install/ubuntu/remmina $INST_SCRIPTS/remmina/
+RUN bash $INST_SCRIPTS/remmina/install_remmina.sh  && rm -rf $INST_SCRIPTS/remmina/
+
+RUN mkdir $HOME/.config/remmina/
+COPY ./assets/install/ubuntu/remmina/remmina.pref $HOME/.config/remmina/remmina.pref
+RUN chown -R 1000:1000 $HOME/.config/remmina/
+
+# Install some useful tools
+COPY ./assets/install/ubuntu/tools $INST_SCRIPTS/tools/
+RUN bash $INST_SCRIPTS/tools/install_tools.sh  && rm -rf $INST_SCRIPTS/tools/
+
+# Install AnyDesk
+COPY ./assets/install/ubuntu/anydesk $INST_SCRIPTS/anydesk/
+RUN bash $INST_SCRIPTS/anydesk/install_anydesk.sh  && rm -rf $INST_SCRIPTS/anydesk/
+
+# # Install TeamViewer
+# COPY ./assets/install/ubuntu/teamviewer $INST_SCRIPTS/teamviewer/
+# RUN bash $INST_SCRIPTS/teamviewer/install_teamviewer.sh  && rm -rf $INST_SCRIPTS/teamviewer/
+
+# Install Parsec
+COPY ./assets/install/ubuntu/parsec $INST_SCRIPTS/parsec/
+RUN bash $INST_SCRIPTS/parsec/install_parsec.sh  && rm -rf $INST_SCRIPTS/parsec/
+
+# Install RustDesk
+ENV RUSTDESK_VERSION=1.4.9
+COPY ./assets/install/ubuntu/rustdesk $INST_SCRIPTS/rustdesk/
+RUN bash $INST_SCRIPTS/rustdesk/install_rustdesk.sh  && rm -rf $INST_SCRIPTS/rustdesk/
+
+
+# copy dotfiles
+COPY ./assets/config/dotfiles/.fzf $HOME/.fzf
+COPY ./assets/config/dotfiles/.config $HOME/.config/
+
+# Copy custom bashrc
+COPY ./assets/config/bashrc/.bashrc $HOME
+
+# Change Background
+COPY ./assets/wallpapper/7001133.jpg /usr/share/backgrounds/bg_default.png
+
+# Add additional desktop shortcuts
+COPY ./assets/config/desktop-shortcuts/* $HOME/Desktop/
+
+# UPDATE AND CLEANUP
+# RUN apt-get update && apt-get upgrade -y && apt autoremove -y && apt-get clean 
+
+######### End Customizations ###########
+
+RUN chown 1000:0 $HOME
+RUN $STARTUPDIR/set_user_permission.sh $HOME
+
+ENV HOME=/home/kasm-user
+WORKDIR $HOME
+RUN mkdir -p $HOME && chown -R 1000:0 $HOME
+
+USER 1000
