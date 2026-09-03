@@ -89,6 +89,8 @@ COPY ./assets/install/ubuntu/fonts/JetBrainsMono-2.242/fonts/* /usr/share/fonts/
 COPY ./assets/install/ubuntu/bat/ $INST_SCRIPTS/bat/
 RUN bash $INST_SCRIPTS/bat/install_bat.sh  && rm -rf $INST_SCRIPTS/bat/
 
+# UPDATE AND CLEANUP
+RUN apt-get update && apt-get upgrade -y && apt autoremove -y && apt-get clean 
 
 ######### End Customizations ###########
 

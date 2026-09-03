@@ -94,7 +94,6 @@ RUN bash $INST_SCRIPTS/tools/install_tools.sh  && rm -rf $INST_SCRIPTS/tools/
 
 
 # copy dotfiles
-COPY ./assets/config/dotfiles/.ssh $HOME/.ssh
 COPY ./assets/config/dotfiles/.fzf $HOME/.fzf
 COPY ./assets/config/dotfiles/.config $HOME/.config/
 
@@ -107,6 +106,8 @@ COPY ./assets/wallpapper/7001133.jpg /usr/share/backgrounds/bg_default.png
 # Add additional desktop shortcuts
 COPY ./assets/config/desktop-shortcuts/* $HOME/Desktop/
 
+# UPDATE AND CLEANUP
+RUN apt-get update && apt-get upgrade -y && apt autoremove -y && apt-get clean 
 
 ######### End Customizations ###########
 
